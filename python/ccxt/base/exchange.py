@@ -319,10 +319,53 @@ class Exchange(object):
     def describe(self):
         return {}
 
-    @classmethod
-    def define_rest_api(cls, api, method_name, options={}):
+    # @classmethod
+    # def define_rest_api(cls, api, method_name, options={}):
+    #     delimiters = re.compile('[^a-zA-Z0-9]')
+    #     entry = getattr(cls, method_name)  # returns a function (instead of a bound method)
+    #     for api_type, methods in api.items():
+    #         for http_method, urls in methods.items():
+    #             for url in urls:
+    #                 url = url.strip()
+    #                 split_path = delimiters.split(url)
+    #
+    #                 uppercase_method = http_method.upper()
+    #                 lowercase_method = http_method.lower()
+    #                 camelcase_method = lowercase_method.capitalize()
+    #                 camelcase_suffix = ''.join([Exchange.capitalize(x) for x in split_path])
+    #                 lowercase_path = [x.strip().lower() for x in split_path]
+    #                 underscore_suffix = '_'.join([k for k in lowercase_path if len(k)])
+    #
+    #                 camelcase = api_type + camelcase_method + Exchange.capitalize(camelcase_suffix)
+    #                 underscore = api_type + '_' + lowercase_method + '_' + underscore_suffix.lower()
+    #
+    #                 if 'suffixes' in options:
+    #                     if 'camelcase' in options['suffixes']:
+    #                         camelcase += options['suffixes']['camelcase']
+    #                     if 'underscore' in options['suffixes']:
+    #                         underscore += options['suffixes']['underscore']
+    #
+    #                 def partialer():
+    #                     outer_kwargs = {'path': url, 'api': api_type, 'method': uppercase_method}
+    #
+    #                     @functools.wraps(entry)
+    #                     def inner(_self, params=None):
+    #                         """
+    #                         Inner is called when a generated method (publicGetX) is called.
+    #                         _self is a reference to self created by function.__get__(exchange, type(exchange))
+    #                         https://en.wikipedia.org/wiki/Closure_(computer_programming) equivalent to functools.partial
+    #                         """
+    #                         inner_kwargs = dict(outer_kwargs)  # avoid mutation
+    #                         if params is not None:
+    #                             inner_kwargs['params'] = params
+    #                         return entry(_self, **inner_kwargs)
+    #                     return inner
+    #                 to_bind = partialer()
+    #                 setattr(cls, camelcase, to_bind)
+    #                 setattr(cls, underscore, to_bind)
+
+    def define_rest_api(self, api, method_name, options={}):
         delimiters = re.compile('[^a-zA-Z0-9]')
-        entry = getattr(cls, method_name)  # returns a function (instead of a bound method)
         for api_type, methods in api.items():
             for http_method, urls in methods.items():
                 for url in urls:
@@ -345,24 +388,9 @@ class Exchange(object):
                         if 'underscore' in options['suffixes']:
                             underscore += options['suffixes']['underscore']
 
-                    def partialer():
-                        outer_kwargs = {'path': url, 'api': api_type, 'method': uppercase_method}
-
-                        @functools.wraps(entry)
-                        def inner(_self, params=None):
-                            """
-                            Inner is called when a generated method (publicGetX) is called.
-                            _self is a reference to self created by function.__get__(exchange, type(exchange))
-                            https://en.wikipedia.org/wiki/Closure_(computer_programming) equivalent to functools.partial
-                            """
-                            inner_kwargs = dict(outer_kwargs)  # avoid mutation
-                            if params is not None:
-                                inner_kwargs['params'] = params
-                            return entry(_self, **inner_kwargs)
-                        return inner
-                    to_bind = partialer()
-                    setattr(cls, camelcase, to_bind)
-                    setattr(cls, underscore, to_bind)
+                    partial = functools.partial(getattr(self, method_name), url, api_type, uppercase_method)
+                    setattr(self, camelcase, partial)
+                    setattr(self, underscore, partial)
 
     def raise_error(self, exception_type, url=None, method=None, error=None, details=None):
         if error:
