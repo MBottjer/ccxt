@@ -387,8 +387,8 @@ class bithumb (Exchange):
                     else:
                         raise ExchangeError(feedback)
 
-    async def request(self, path, api='public', method='GET', params={}, headers=None, body=None):
-        response = await self.fetch2(path, api, method, params, headers, body)
+    async def request(self, path, api='public', method='GET', params={}, headers=None, body=None, proxy=''):
+        response = await self.fetch2(path, api, method, params, headers, body, proxy)
         if 'status' in response:
             if response['status'] == '0000':
                 return response

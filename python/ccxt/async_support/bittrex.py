@@ -939,8 +939,8 @@ class bittrex (Exchange):
             return self.parse8601(x)
         return self.parse8601(x + 'Z')
 
-    async def request(self, path, api='public', method='GET', params={}, headers=None, body=None):
-        response = await self.fetch2(path, api, method, params, headers, body)
+    async def request(self, path, api='public', method='GET', params={}, headers=None, body=None, proxy=''):
+        response = await self.fetch2(path, api, method, params, headers, body, proxy)
         # a workaround for APIKEY_INVALID
         if (api == 'account') or (api == 'market'):
             self.options['hasAlreadyAuthenticatedSuccessfully'] = True

@@ -45,8 +45,8 @@ class btctradeim (coinegg):
         result['options']['quoteIds'] = ['btc', 'eth', 'usc']
         return result
 
-    async def request(self, path, api='public', method='GET', params={}, headers=None, body=None):
-        response = await self.fetch2(path, api, method, params, headers, body)
+    async def request(self, path, api='public', method='GET', params={}, headers=None, body=None, proxy=''):
+        response = await self.fetch2(path, api, method, params, headers, body, proxy)
         if api == 'web':
             return response
         data = self.safe_value(response, 'data')

@@ -115,10 +115,11 @@ class Exchange(BaseExchange):
         request = self.sign(path, api, method, params, headers, body)
         return await self.fetch(request['url'], request['method'], request['headers'], request['body'])
 
-    async def fetch(self, url, method='GET', headers=None, body=None):
+    async def fetch(self, url, method='GET', headers=None, body=None, proxy=''):
         """Perform a HTTP request and return decoded JSON data"""
         request_headers = self.prepare_request_headers(headers)
-        url = self.proxy + url
+
+        url = proxy + url
 
         if self.verbose:
             print("\nRequest:", method, url, headers, body)
@@ -282,3 +283,10 @@ class Exchange(BaseExchange):
                     self.markets[symbol] = self.deep_extend(self.markets[symbol], response[symbol])
                 self.options['limitsLoaded'] = self.milliseconds()
         return self.markets
+
+    async def request(self, path, api='public', method='GET', params={}, headers=None, body=None, proxy=''):
+        response = await self.fetch2(path, api, method, params, headers, body, proxy)
+        # a workaround for {"code":-2015,"msg":"Invalid API-key, IP, or permissions for action."}
+        if (api == 'private') or (api == 'wapi'):
+            self.options['hasAlreadyAuthenticatedSuccessfully'] = True
+        return response

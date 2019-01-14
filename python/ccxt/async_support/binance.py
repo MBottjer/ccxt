@@ -311,6 +311,7 @@ class binance (Exchange):
         return self.options['timeDifference']
 
     async def fetch_markets(self, params={}):
+        params['devesh'] = 'hello'
         response = await self.publicGetExchangeInfo()
         if self.options['adjustForTimeDifference']:
             await self.load_time_difference()
@@ -1125,8 +1126,8 @@ class binance (Exchange):
                 if not success:
                     raise ExchangeError(self.id + ' ' + body)
 
-    async def request(self, path, api='public', method='GET', params={}, headers=None, body=None):
-        response = await self.fetch2(path, api, method, params, headers, body)
+    async def request(self, path, api='public', method='GET', params={}, headers=None, body=None, proxy=''):
+        response = await self.fetch2(path, api, method, params, headers, body, proxy)
         # a workaround for {"code":-2015,"msg":"Invalid API-key, IP, or permissions for action."}
         if (api == 'private') or (api == 'wapi'):
             self.options['hasAlreadyAuthenticatedSuccessfully'] = True
